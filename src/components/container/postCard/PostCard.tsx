@@ -1,0 +1,73 @@
+import useScreenSize from '@/hooks/useScreenSize';
+import { BlogPostProps } from '@/interfaces/example.interface';
+import { MessageSquare, ThumbsUp } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import React from 'react';
+
+interface PostCardProps {
+  post: BlogPostProps;
+  index: number;
+}
+
+const PostCard: React.FC<PostCardProps> = ({ post, index }) => {
+  const { isDesktop } = useScreenSize();
+
+  return (
+    <div key={index} className='flex gap-24 lg:border-b border-neutral-300'>
+      {isDesktop && (
+        <Link href={`/post/${post.id}`} className='shrink-0 py-24'>
+          <Image
+            src={`${post.imageUrl}`}
+            alt='Logo'
+            width={340}
+            height={258}
+            className='object-cover w-340 h-258'
+          />
+        </Link>
+      )}
+      <div className='flex flex-col gap-12 pt-16'>
+        <div className='flex flex-col gap-8'>
+          <Link href={`/post/${post.id}`} className='text-md font-bold'>
+            {post.title}
+          </Link>
+          <div className='flex gap-8'>
+            {post.tags?.map((tag, idx) => (
+              <div
+                key={idx}
+                className='flex px-8 py-2 items-center justify-center text-xs font-regular border border-neutral-300 rounded-md h-28 truncate'
+              >
+                {tag}
+              </div>
+            ))}
+          </div>
+          <div className='line-clamp-2 text-xs font-regular'>
+            {post.content}
+          </div>
+        </div>
+        <div className='flex items-center justify-start gap-8'>
+          <Image
+            src={`${post.imageUrl}`}
+            alt='Logo'
+            width={30}
+            height={30}
+            className='rounded-full object-cover w-30 h-30'
+          />
+          <p className='text-xs font-regular'>{post.author?.name}</p>
+          <Image src='/ellipse.svg' alt='dot' width={4} height={4} />
+          <p className='text-xs font-regular text-neutral-600'>
+            {post.createdAt}
+          </p>
+        </div>
+        <div className='flex items-center justify-start gap-8 mb-16'>
+          <ThumbsUp size={20} />
+          <span>{post.likes}</span> <MessageSquare size={20} />
+          <span>{post.comment || 0}</span>
+        </div>
+        <hr style={{ borderColor: '#d5d7da' }} className='lg:hidden' />
+      </div>
+    </div>
+  );
+};
+
+export default PostCard;

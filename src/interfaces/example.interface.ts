@@ -1,1 +1,15 @@
-// you can delete this file if ur not using it
+export interface BlogPostProps {
+  id?: string;
+  title?: string;
+  content?: string;
+  tags?: string[];
+  imageUrl?: string;
+  createdAt?: string;
+  likes?: number;
+  comment?: number;
+  author?: {
+    id?: number;
+    name?: string;
+    email?: string;
+  };
+}
