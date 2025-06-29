@@ -1,11 +1,13 @@
-import { CommentPostById } from '@/app/api/posts/[id]/route';
-import { UserById } from '@/app/api/posts/route';
+'use client';
+
 import useScreenSize from '@/hooks/useScreenSize';
-import { PostCardProps, User } from '@/interfaces/BlogProps.interface';
+import type { PostCardProps, User } from '@/interfaces/BlogProps.interface';
+import { getPostComments, getUserById } from '@/lib/api-client';
 import { MessageSquare, ThumbsUp } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 
 const formatDateToIndonesian = (isoDate: string): string => {
   const date = new Date(isoDate);
@@ -22,27 +24,25 @@ const PostCard: React.FC<PostCardProps> = ({ post, index }) => {
   const [commentPost, setCommentPost] = useState<Comment[] | null>(null);
 
   useEffect(() => {
-    const userById = async () => {
-      const userId = post?.author?.id;
+    const fetchData = async () => {
       try {
-        const data = await UserById(String(userId));
-        setUserPost(data);
+        // Fetch user data
+        if (post?.author?.id) {
+          const userData = await getUserById(String(post.author.id));
+          setUserPost(userData);
+        }
+
+        // Fetch comments
+        if (post?.id) {
+          const commentsData = await getPostComments(post.id);
+          setCommentPost(commentsData);
+        }
       } catch (error) {
-        console.error(error);
+        console.error('Failed to fetch post card data:', error);
       }
     };
 
-    const fetchComment = async () => {
-      try {
-        const data = await CommentPostById(post?.id as string);
-        setCommentPost(data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    fetchComment();
-    userById();
+    fetchData();
   }, [post]);
 
   return (

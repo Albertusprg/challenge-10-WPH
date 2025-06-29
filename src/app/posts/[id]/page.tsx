@@ -1,13 +1,21 @@
 'use client';
 
-import { CommentPostById, PostById } from '@/app/api/posts/[id]/route';
-import { RecommendedPost, UserById } from '@/app/api/posts/route';
+import {
+  getPostById,
+  getPostComments,
+  getUserById,
+  getRecommendedPosts,
+} from '@/lib/api-client';
 import PostCard from '@/components/container/postCard/PostCard';
-import { BlogPostProps, Comment, User } from '@/interfaces/BlogProps.interface';
+import type {
+  BlogPostProps,
+  Comment,
+  User,
+} from '@/interfaces/BlogProps.interface';
 import { MessageSquare, ThumbsUp, X } from 'lucide-react';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const formatDateToIndonesian = (isoDate: string): string => {
   const date = new Date(isoDate);
@@ -17,6 +25,7 @@ const formatDateToIndonesian = (isoDate: string): string => {
     year: 'numeric',
   });
 };
+
 export default function DetailPost() {
   const params = useParams();
   const [post, setPost] = useState<BlogPostProps | null>(null);
@@ -28,59 +37,41 @@ export default function DetailPost() {
   >(null);
   const [seeAllComments, setSeeAllComments] = useState(false);
   const [userPost, setUserPost] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchPost = async () => {
+    const fetchData = async () => {
+      if (!params?.id) return;
+
+      setIsLoading(true);
       try {
-        const data = await PostById(params.id as string);
-        setPost(data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
+        // Fetch post data
+        const postData = await getPostById(params.id as string);
+        setPost(postData);
 
-    const fetchComment = async () => {
-      try {
-        const data = await CommentPostById(params.id as string);
-        setCommentPost(data);
-        setPaginatedCommentPost(data.slice(0, 3));
-      } catch (error) {
-        console.error(error);
-      }
-    };
+        // Fetch comments
+        const commentsData = await getPostComments(params.id as string);
+        setCommentPost(commentsData);
+        setPaginatedCommentPost(commentsData.slice(0, 3));
 
-    const fetchAnotherPost = async () => {
-      try {
-        const data = await RecommendedPost();
-        setAnotherPost(data.data[0]);
-      } catch (error) {
-        console.error(error);
-      }
-    };
+        // Fetch another post
+        const recommendedData = await getRecommendedPosts();
+        setAnotherPost(recommendedData.data[0]);
 
-    if (params?.id) {
-      fetchPost();
-      fetchComment();
-    }
-    fetchAnotherPost();
-  }, [params]);
-
-  useEffect(() => {
-    const fetchUserPost = async () => {
-      if (post?.author?.id) {
-        try {
-          const userId = String(post.author.id);
-          const data = await UserById(userId);
-          setUserPost(data);
-        } catch (error) {
-          // Tangkap error jika fetch gagal
-          console.error('Failed to fetch user data:', error);
+        // Fetch user data if post has author
+        if (postData?.author?.id) {
+          const userData = await getUserById(String(postData.author.id));
+          setUserPost(userData);
         }
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchUserPost();
-  }, [post]);
+    fetchData();
+  }, [params?.id]);
 
   const handleSendComment = () => {
     if (!commentText.trim()) return;
@@ -92,7 +83,13 @@ export default function DetailPost() {
     setSeeAllComments(!seeAllComments);
   };
 
-  if (!post) return <div className='p-16 text-center'>Loading...</div>;
+  if (isLoading) {
+    return <div className='p-16 text-center'>Loading...</div>;
+  }
+
+  if (!post) {
+    return <div className='p-16 text-center'>Post not found</div>;
+  }
 
   return (
     <div

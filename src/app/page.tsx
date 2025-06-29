@@ -8,8 +8,8 @@ import {
   ThumbsUp,
 } from 'lucide-react';
 import { useEffect, useState, useCallback, useMemo } from 'react';
-import { MostLikedPost, RecommendedPost } from './api/posts/route';
-import { BlogPostProps } from '@/interfaces/BlogProps.interface';
+import type { BlogPostProps } from '@/interfaces/BlogProps.interface';
+import { getMostLikedPosts, getRecommendedPosts } from '@/lib/api-client';
 
 export default function Home() {
   const postsPerPage = 5;
@@ -27,7 +27,7 @@ export default function Home() {
     async (page: number) => {
       setIsLoading(true);
       try {
-        const data = await RecommendedPost(page, postsPerPage);
+        const data = await getRecommendedPosts(page, postsPerPage);
         setRecommendedPost(data.data);
         setTotalPosts(data.total);
       } catch (error) {
@@ -43,7 +43,7 @@ export default function Home() {
 
   const fetchMostLikedPost = async () => {
     try {
-      const data = await MostLikedPost();
+      const data = await getMostLikedPosts();
       setMostLikedPost(data.data);
     } catch (error) {
       console.error('Failed to fetch most liked posts:', error);

@@ -1,10 +1,12 @@
 'use client';
 
+import type React from 'react';
+
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
 import PostCard from '@/components/container/postCard/PostCard';
-import { SearchPost } from '@/app/api/posts/search/route';
-import { BlogPostProps } from '@/interfaces/BlogProps.interface';
+import { searchPosts } from '@/lib/api-client';
+import type { BlogPostProps } from '@/interfaces/BlogProps.interface';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Search, X } from 'lucide-react';
@@ -25,7 +27,7 @@ export default function SearchPage() {
     setIsLoading(true);
     setSearchResults(null);
     try {
-      const data = await SearchPost(searchQuery);
+      const data = await searchPosts(searchQuery);
       setSearchResults(data.data);
     } catch (error) {
       console.error('Failed to fetch search results:', error);
