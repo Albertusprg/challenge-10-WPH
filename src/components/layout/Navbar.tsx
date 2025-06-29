@@ -60,11 +60,11 @@ const Navbar = () => {
             <nav className='flex justify-center items-center gap-24 mx-auto'>
               <Link
                 href='/login'
-                className='flex items-center text-sm font-semibold text-center'
+                className='flex items-center text-sm font-semibold text-center text-blue-500'
               >
                 Login
               </Link>
-              <div className='border border-neutral-300 items-center justify-center flex text-neutral-300'></div>
+              <div className='w-px h-23 bg-neutral-300'></div>
               <Link
                 href='/register'
                 className='flex items-center text-center justify-center text-sm font-regular w-182 h-44 bg-primary-300 rounded-full text-white'
