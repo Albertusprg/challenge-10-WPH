@@ -1,25 +1,14 @@
 'use client';
 
 import { CommentPostById, PostById } from '@/app/api/posts/[id]/route';
-import { RecommendedPost } from '@/app/api/posts/route';
+import { RecommendedPost, UserById } from '@/app/api/posts/route';
 import PostCard from '@/components/container/postCard/PostCard';
-import { BlogPostProps } from '@/interfaces/BlogProps.interface';
+import { BlogPostProps, Comment, User } from '@/interfaces/BlogProps.interface';
 import { MessageSquare, ThumbsUp, X } from 'lucide-react';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
-interface Comment {
-  id: number;
-  content: string;
-  createdAt: string;
-  author: {
-    id: number;
-    name: string;
-    headline: string;
-    avatarUrl: string;
-  };
-}
 const formatDateToIndonesian = (isoDate: string): string => {
   const date = new Date(isoDate);
   return date.toLocaleDateString('id-ID', {
@@ -38,6 +27,7 @@ export default function DetailPost() {
     Comment[] | null
   >(null);
   const [seeAllComments, setSeeAllComments] = useState(false);
+  const [userPost, setUserPost] = useState<User | null>(null);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -75,6 +65,23 @@ export default function DetailPost() {
     fetchAnotherPost();
   }, [params]);
 
+  useEffect(() => {
+    const fetchUserPost = async () => {
+      if (post?.author?.id) {
+        try {
+          const userId = String(post.author.id);
+          const data = await UserById(userId);
+          setUserPost(data);
+        } catch (error) {
+          // Tangkap error jika fetch gagal
+          console.error('Failed to fetch user data:', error);
+        }
+      }
+    };
+
+    fetchUserPost();
+  }, [post]);
+
   const handleSendComment = () => {
     if (!commentText.trim()) return;
     console.log('Comment submitted:', commentText);
@@ -110,7 +117,11 @@ export default function DetailPost() {
 
       <div className='flex items-center justify-start gap-8 border-b border-neutral-300 pb-12'>
         <Image
-          src={post.imageUrl || '/default.jpg'}
+          src={
+            userPost?.avatarUrl
+              ? `https://blogger-wph-api-production.up.railway.app${userPost.avatarUrl}`
+              : '/user.svg'
+          }
           alt='Author'
           width={30}
           height={30}
@@ -127,7 +138,7 @@ export default function DetailPost() {
         <ThumbsUp size={20} />
         <span>{post.likes}</span>
         <MessageSquare size={20} />
-        <span>{post.comment || 0}</span>
+        <span>{commentPost?.length || 0}</span>
       </div>
 
       <Image
@@ -163,7 +174,7 @@ export default function DetailPost() {
         <h2 className='text-sm font-semibold text-neutral-700'>
           Give your comments
         </h2>
-        <div className='flex flex-col gap-4'>
+        <div className='flex flex-col gap-12'>
           <textarea
             name='comment'
             placeholder='Enter your comment'
@@ -171,12 +182,14 @@ export default function DetailPost() {
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
           />
-          <button
-            onClick={handleSendComment}
-            className='bg-primary-300 text-white px-6 rounded-full h-48'
-          >
-            Send
-          </button>
+          <div className='justify-end flex'>
+            <button
+              onClick={handleSendComment}
+              className='bg-primary-300 text-white px-6 rounded-full w-204 h-48'
+            >
+              Send
+            </button>
+          </div>
         </div>
 
         {PaginatedCommentPost?.map((comment) => (

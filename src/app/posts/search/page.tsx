@@ -57,7 +57,7 @@ export default function SearchPage() {
 
   return (
     <div
-      className={`flex flex-col pt-24 lg:pt-48 gap-24 h-screen ${
+      className={`flex flex-col pt-24 lg:pt-48 gap-24 ${
         searchResults?.length === 0 ? 'items-center' : 'items-start'
       }`}
       style={{

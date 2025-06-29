@@ -38,7 +38,7 @@ const SearchBar = () => {
       {/* Desktop Search Bar */}
       {isDesktop && (
         <form onSubmit={handleSubmit} className='flex items-center gap-2'>
-          <div className='flex px-16 py-12 rounded-xl w-373 h-48 border border-neutral-300 focus:ring-2 focus:ring-primary-500 transition-all'>
+          <div className='flex px-16 py-12 gap-8 items-center justify-center rounded-xl w-373 h-48 border border-neutral-300 focus:ring-2 focus:ring-primary-500 transition-all'>
             <button
               type='submit'
               className='p-2 hover:bg-neutral-400 rounded transition-colors cursor-pointer'

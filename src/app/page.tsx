@@ -117,7 +117,7 @@ export default function Home() {
 
   return (
     <div
-      className='text-neutral-900 flex flex-col lg:flex-row lg:justify-center'
+      className='text-neutral-900 flex flex-col lg:flex-row lg:justify-center mb-24'
       style={{
         paddingInline: 'clamp(16px, 11.84vw - 30.55px, 140px)',
         paddingTop: 'clamp(88px, calc(2.69rem + 5.35vw), 128px)',

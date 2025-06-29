@@ -1,17 +1,49 @@
+import { CommentPostById } from '@/app/api/posts/[id]/route';
+import { UserById } from '@/app/api/posts/route';
 import useScreenSize from '@/hooks/useScreenSize';
-import { BlogPostProps } from '@/interfaces/BlogProps.interface';
+import { PostCardProps, User } from '@/interfaces/BlogProps.interface';
 import { MessageSquare, ThumbsUp } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-interface PostCardProps {
-  post: BlogPostProps;
-  index: number;
-}
+const formatDateToIndonesian = (isoDate: string): string => {
+  const date = new Date(isoDate);
+  return date.toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+};
 
 const PostCard: React.FC<PostCardProps> = ({ post, index }) => {
   const { isDesktop } = useScreenSize();
+  const [userPost, setUserPost] = useState<User | null>(null);
+  const [commentPost, setCommentPost] = useState<Comment[] | null>(null);
+
+  useEffect(() => {
+    const userById = async () => {
+      const userId = post?.author?.id;
+      try {
+        const data = await UserById(String(userId));
+        setUserPost(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    const fetchComment = async () => {
+      try {
+        const data = await CommentPostById(post?.id as string);
+        setCommentPost(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchComment();
+    userById();
+  }, [post]);
 
   return (
     <div key={index} className='flex gap-24 lg:border-b border-neutral-300'>
@@ -47,7 +79,11 @@ const PostCard: React.FC<PostCardProps> = ({ post, index }) => {
         </div>
         <div className='flex items-center justify-start gap-8'>
           <Image
-            src={`${post.imageUrl}`}
+            src={
+              userPost?.avatarUrl
+                ? `https://blogger-wph-api-production.up.railway.app${userPost.avatarUrl}`
+                : '/user.svg'
+            }
             alt='Logo'
             width={30}
             height={30}
@@ -56,13 +92,13 @@ const PostCard: React.FC<PostCardProps> = ({ post, index }) => {
           <p className='text-xs font-regular'>{post.author?.name}</p>
           <Image src='/ellipse.svg' alt='dot' width={4} height={4} />
           <p className='text-xs font-regular text-neutral-600'>
-            {post.createdAt}
+            {post.createdAt ? formatDateToIndonesian(post.createdAt) : ''}
           </p>
         </div>
         <div className='flex items-center justify-start gap-8 mb-16'>
           <ThumbsUp size={20} />
           <span>{post.likes}</span> <MessageSquare size={20} />
-          <span>{post.comment || 0}</span>
+          <span>{commentPost?.length || 0}</span>
         </div>
         <hr style={{ borderColor: '#d5d7da' }} className='lg:hidden' />
       </div>
