@@ -54,7 +54,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, index }) => {
             alt='Logo'
             width={340}
             height={258}
-            className='object-cover max-w-340 max-h-258'
+            className='object-cover max-w-340 max-h-258 rounded-sm'
           />
         </Link>
       )}
