@@ -3,4 +3,5 @@ export const BlogPost = {
   mostLiked: '/posts/most-liked',
   userById: '/users/',
   postById: '/posts/',
+  searchPost: 'posts/search',
 };

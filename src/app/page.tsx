@@ -1,4 +1,5 @@
 'use client';
+
 import PostCard from '@/components/container/postCard/PostCard';
 import {
   ChevronLeft,
@@ -6,25 +7,12 @@ import {
   MessageSquare,
   ThumbsUp,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { MostLikedPost, RecommendedPost } from './api/posts/route';
+import { BlogPostProps } from '@/interfaces/BlogProps.interface';
 
 export default function Home() {
-  interface BlogPostProps {
-    id?: string;
-    title?: string;
-    content?: string;
-    tags?: string[];
-    imageUrl?: string;
-    createdAt?: string;
-    likes?: number;
-    comment?: number;
-    author?: {
-      id?: number;
-      name?: string;
-      email?: string;
-    };
-  }
+  const postsPerPage = 5;
   const [recommendedPost, setRecommendedPost] = useState<
     BlogPostProps[] | null
   >(null);
@@ -32,92 +20,172 @@ export default function Home() {
     null
   );
   const [currentPage, setCurrentPage] = useState(1);
-  const postsPerPage = 5;
-  const paginatedPosts = recommendedPost?.slice(
-    (currentPage - 1) * postsPerPage,
-    currentPage * postsPerPage
+  const [totalPosts, setTotalPosts] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchRecommendedPost = useCallback(
+    async (page: number) => {
+      setIsLoading(true);
+      try {
+        const data = await RecommendedPost(page, postsPerPage);
+        setRecommendedPost(data.data);
+        setTotalPosts(data.total);
+      } catch (error) {
+        console.error('Failed to fetch recommended posts:', error);
+        setRecommendedPost([]);
+        setTotalPosts(0);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [postsPerPage]
   );
-  const mostLikedPosts = mostLikedPost?.slice(0, 3);
+
+  const fetchMostLikedPost = async () => {
+    try {
+      const data = await MostLikedPost();
+      setMostLikedPost(data.data);
+    } catch (error) {
+      console.error('Failed to fetch most liked posts:', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchRecommendedPost = async () => {
-      const data = await RecommendedPost();
-      setRecommendedPost(data.data);
-    };
+    fetchRecommendedPost(currentPage);
+  }, [currentPage, fetchRecommendedPost]);
 
-    const fetchMostLikeddPost = async () => {
-      const data = await MostLikedPost();
-      console.log(data.data);
-      setMostLikedPost(data.data);
-    };
-
-    fetchRecommendedPost();
-    fetchMostLikeddPost();
+  useEffect(() => {
+    fetchMostLikedPost();
   }, []);
 
+  const totalPages = useMemo(() => {
+    if (!totalPosts) return 1;
+    return Math.ceil(totalPosts / postsPerPage);
+  }, [totalPosts, postsPerPage]);
+
+  const getPaginationNumbers = () => {
+    const pageNumbers: (number | string)[] = [];
+    const maxVisiblePages = 5;
+    const delta = 1;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+      return pageNumbers;
+    }
+
+    const range = [];
+    for (
+      let i = Math.max(2, currentPage - delta);
+      i <= Math.min(totalPages - 1, currentPage + delta);
+      i++
+    ) {
+      range.push(i);
+    }
+
+    const pages = [1, ...range, totalPages];
+
+    const uniquePages = [...new Set(pages)].sort((a, b) => a - b);
+
+    let lastPage = 0;
+    const finalPages = [];
+    for (const page of uniquePages) {
+      if (page > lastPage + 1) {
+        finalPages.push('...');
+      }
+      finalPages.push(page);
+      lastPage = page;
+    }
+
+    if (!finalPages.includes(currentPage)) {
+      finalPages.splice(finalPages.indexOf('...'), 0, currentPage);
+    }
+
+    return finalPages;
+  };
+
+  const paginationNumbers = getPaginationNumbers();
+
+  const handleNextPage = () => {
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  };
+
+  const handlePreviousPage = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
   return (
-    <div className='text-neutral-900 flex flex-col lg:flex-row lg:justify-center pt-24 lg:pt-48'>
-      <div className='flex flex-col px-16 max-w-807'>
+    <div
+      className='text-neutral-900 flex flex-col lg:flex-row lg:justify-center'
+      style={{
+        paddingInline: 'clamp(16px, 11.84vw - 30.55px, 140px)',
+        paddingTop: 'clamp(88px, calc(2.69rem + 5.35vw), 128px)',
+      }}
+    >
+      {/* Recommended Posts Section */}
+      <div className='flex flex-col max-w-807'>
         <h1 className='text-xl font-bold'>Recommend For You</h1>
-        {paginatedPosts?.map((post, index) => (
-          <div key={index}>
-            <PostCard post={post} index={index} />
-          </div>
-        ))}
-
-        <div>
-          {recommendedPost && (
-            <div className='flex justify-center items-center px-24 mt-16 gap-8'>
-              <button
-                className=' flex gap-6 disabled:opacity-50 text-xs font-regular items-center justify-center cursor-pointer'
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft size={24} />
-                Previous
-              </button>
-
-              {Array.from({
-                length: Math.ceil(recommendedPost.length / postsPerPage),
-              }).map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setCurrentPage(idx + 1)}
-                  className={`w-36 h-36 rounded-full cursor-pointer text-sm ${
-                    currentPage === idx + 1 ? 'bg-blue-500 text-white' : ''
-                  }`}
-                >
-                  {idx + 1}
-                </button>
-              ))}
-
-              <button
-                className='flex gap-6 disabled:opacity-50 text-xs font-regular items-center justify-center cursor-pointer'
-                onClick={() =>
-                  setCurrentPage((prev) =>
-                    Math.min(
-                      prev + 1,
-                      Math.ceil(recommendedPost.length / postsPerPage)
-                    )
-                  )
-                }
-                disabled={
-                  currentPage ===
-                  Math.ceil(recommendedPost.length / postsPerPage)
-                }
-              >
-                Next
-                <ChevronRight size={24} />
-              </button>
+        {isLoading ? (
+          <p className='text-center py-16 text-neutral-500'>Loading posts...</p>
+        ) : (
+          recommendedPost?.map((post, index) => (
+            <div key={post.id || index}>
+              <PostCard post={post} index={index} />
             </div>
-          )}
-        </div>
+          ))
+        )}
+
+        {/* Pagination Controls */}
+        {recommendedPost && totalPages > 1 && (
+          <div className='flex justify-center items-center px-24 mt-16 gap-8'>
+            <button
+              className='flex gap-6 text-xs font-regular items-center justify-center cursor-pointer'
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1 || isLoading}
+            >
+              <ChevronLeft size={24} />
+              Previous
+            </button>
+
+            {/* Render pagination buttons dynamically */}
+            {paginationNumbers.map((pageNumber, idx) => (
+              <div key={idx}>
+                {pageNumber === '...' ? (
+                  <span className='text-sm font-bold mx-2'>...</span>
+                ) : (
+                  <button
+                    onClick={() => setCurrentPage(pageNumber as number)}
+                    className={`w-36 h-36 rounded-full cursor-pointer text-sm transition-colors ${
+                      currentPage === pageNumber
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-transparent text-neutral-900 hover:bg-neutral-200'
+                    }`}
+                  >
+                    {pageNumber}
+                  </button>
+                )}
+              </div>
+            ))}
+
+            <button
+              className='flex gap-6 text-xs font-regular items-center justify-center cursor-pointer'
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages || isLoading}
+            >
+              Next
+              <ChevronRight size={24} />
+            </button>
+          </div>
+        )}
       </div>
+
+      {/* Most Liked Posts Section */}
       <hr style={{ borderColor: '#d5d7da' }} className='lg:hidden' />
       <aside className='flex flex-col px-16 pt-24 lg:border-l border-neutral-300 max-w-297'>
         <h1 className='text-xl font-bold'>Most Liked Post</h1>
-        {mostLikedPosts?.map((post, index) => (
-          <div key={index} className='flex flex-col gap-12 mt-16'>
+        {mostLikedPost?.slice(0, 3).map((post) => (
+          <div key={post.id} className='flex flex-col gap-12 mt-16'>
             <div className='flex flex-col gap-8'>
               <div className='text-md font-bold'>{post.title}</div>
               <div className='line-clamp-2 text-xs font-regular'>
@@ -126,7 +194,8 @@ export default function Home() {
             </div>
             <div className='flex items-center justify-start gap-8 mb-16'>
               <ThumbsUp size={20} />
-              <span>{post.likes}</span> <MessageSquare size={20} />
+              <span>{post.likes}</span>
+              <MessageSquare size={20} />
               <span>{post.comment || 0}</span>
             </div>
             <hr style={{ borderColor: '#d5d7da' }} />

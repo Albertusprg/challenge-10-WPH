@@ -1,5 +1,5 @@
 import useScreenSize from '@/hooks/useScreenSize';
-import { BlogPostProps } from '@/interfaces/example.interface';
+import { BlogPostProps } from '@/interfaces/BlogProps.interface';
 import { MessageSquare, ThumbsUp } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -16,19 +16,19 @@ const PostCard: React.FC<PostCardProps> = ({ post, index }) => {
   return (
     <div key={index} className='flex gap-24 lg:border-b border-neutral-300'>
       {isDesktop && (
-        <Link href={`/post/${post.id}`} className='shrink-0 py-24'>
+        <Link href={`/posts/${post.id}`} className='shrink-0 py-24'>
           <Image
             src={`${post.imageUrl}`}
             alt='Logo'
             width={340}
             height={258}
-            className='object-cover w-340 h-258'
+            className='object-cover max-w-340 max-h-258'
           />
         </Link>
       )}
       <div className='flex flex-col gap-12 pt-16'>
         <div className='flex flex-col gap-8'>
-          <Link href={`/post/${post.id}`} className='text-md font-bold'>
+          <Link href={`/posts/${post.id}`} className='text-md font-bold'>
             {post.title}
           </Link>
           <div className='flex gap-8'>

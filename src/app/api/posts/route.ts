@@ -2,9 +2,11 @@
 import { api } from '@/services/api';
 import { BlogPost } from './endpoints';
 
-export async function RecommendedPost() {
+export async function RecommendedPost(page: number = 1, limit: number = 5) {
   try {
-    const response = await api.get(BlogPost.recomended);
+    const response = await api.get(
+      `${BlogPost.recomended}?page=${page}&limit=${limit}`
+    );
     const results = response.data;
     return results;
   } catch (error: any) {
