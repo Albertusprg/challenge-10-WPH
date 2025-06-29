@@ -10,6 +10,7 @@ import {
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import type { BlogPostProps } from '@/interfaces/BlogProps.interface';
 import { getMostLikedPosts, getRecommendedPosts } from '@/lib/api-client';
+import Link from 'next/link';
 
 export default function Home() {
   const postsPerPage = 5;
@@ -185,7 +186,11 @@ export default function Home() {
       <aside className='flex flex-col px-16 pt-24 lg:border-l border-neutral-300 max-w-297'>
         <h1 className='text-xl font-bold'>Most Liked Post</h1>
         {mostLikedPost?.slice(0, 3).map((post) => (
-          <div key={post.id} className='flex flex-col gap-12 mt-16'>
+          <Link
+            href={`/posts/${post.id}`}
+            key={post.id}
+            className='flex flex-col gap-12 mt-16'
+          >
             <div className='flex flex-col gap-8'>
               <div className='text-md font-bold'>{post.title}</div>
               <div className='line-clamp-2 text-xs font-regular'>
@@ -199,7 +204,7 @@ export default function Home() {
               <span>{post.comment || 0}</span>
             </div>
             <hr style={{ borderColor: '#d5d7da' }} />
-          </div>
+          </Link>
         ))}
       </aside>
     </div>

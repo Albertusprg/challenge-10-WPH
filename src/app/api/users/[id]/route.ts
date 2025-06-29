@@ -4,7 +4,7 @@ import { BlogPost } from '../../posts/endpoints';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   const { id } = await params;
 
@@ -15,6 +15,9 @@ export async function GET(
   } catch (error: any) {
     const errorMessage =
       error.response?.data?.message || 'Server error occurred';
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    return NextResponse.json(
+      { error: errorMessage },
+      { status: error.response?.status || 500 }
+    );
   }
 }

@@ -29,6 +29,9 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     const errorMessage =
       error.response?.data?.message || 'Server error occurred';
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    return NextResponse.json(
+      { error: errorMessage },
+      { status: error.response?.status || 500 }
+    );
   }
 }

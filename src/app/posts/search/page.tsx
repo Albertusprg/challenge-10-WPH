@@ -136,7 +136,7 @@ export default function SearchPage() {
           </div>
           <Link
             href='/'
-            className='flex items-center text-center justify-center text-sm font-regular w-200 h-44 bg-primary-300 rounded-full text-white'
+            className='flex items-center text-center justify-center text-sm font-regular w-200 h-44 bg-primary-300 rounded-full text-white mb-50'
           >
             Back To Home
           </Link>

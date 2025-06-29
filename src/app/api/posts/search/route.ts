@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
-
-const BASE_API_URL = process.env.NEXT_PUBLIC_BASE_API_URL;
+import { api } from '@/services/api';
+import { BlogPost } from '../endpoints';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -14,29 +14,18 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const externalApiUrl = `${BASE_API_URL}/posts/search?query=${encodeURIComponent(
-      query
-    )}`;
+    const response = await api.get(
+      `${BlogPost.searchPost}?query=${encodeURIComponent(query)}`
+    );
 
-    const response = await fetch(externalApiUrl);
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      return NextResponse.json(
-        {
-          error: errorData.message || 'Failed to fetch data from external API',
-        },
-        { status: response.status }
-      );
-    }
-
-    const data = await response.json();
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error('Error proxying search request to external API:', error);
+    return NextResponse.json(response.data);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message || 'Server error occurred';
     return NextResponse.json(
-      { error: 'Internal server error occurred while searching' },
-      { status: 500 }
+      { error: errorMessage },
+      { status: error.response?.status || 500 }
     );
   }
 }

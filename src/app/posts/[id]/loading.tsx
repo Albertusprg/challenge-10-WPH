@@ -7,17 +7,14 @@ export default function Loading() {
         paddingTop: 'clamp(88px, calc(2.69rem + 5.35vw), 128px)',
       }}
     >
-      {/* Title skeleton */}
       <div className='h-8 bg-neutral-200 rounded w-3/4'></div>
 
-      {/* Tags skeleton */}
       <div className='flex gap-8'>
         <div className='h-7 bg-neutral-200 rounded w-16'></div>
         <div className='h-7 bg-neutral-200 rounded w-20'></div>
         <div className='h-7 bg-neutral-200 rounded w-14'></div>
       </div>
 
-      {/* Author info skeleton */}
       <div className='flex items-center justify-start gap-8 border-b border-neutral-300 pb-12'>
         <div className='w-30 h-30 bg-neutral-200 rounded-full'></div>
         <div className='h-4 bg-neutral-200 rounded w-24'></div>
@@ -25,7 +22,6 @@ export default function Loading() {
         <div className='h-4 bg-neutral-200 rounded w-20'></div>
       </div>
 
-      {/* Stats skeleton */}
       <div className='flex items-center justify-start gap-8 border-b border-neutral-300 pb-12'>
         <div className='w-5 h-5 bg-neutral-200 rounded'></div>
         <div className='h-4 bg-neutral-200 rounded w-8'></div>
@@ -33,10 +29,8 @@ export default function Loading() {
         <div className='h-4 bg-neutral-200 rounded w-8'></div>
       </div>
 
-      {/* Image skeleton */}
       <div className='w-full h-64 bg-neutral-200 rounded'></div>
 
-      {/* Content skeleton */}
       <div className='space-y-3'>
         <div className='h-4 bg-neutral-200 rounded w-full'></div>
         <div className='h-4 bg-neutral-200 rounded w-full'></div>
@@ -47,11 +41,9 @@ export default function Loading() {
 
       <hr />
 
-      {/* Comments section skeleton */}
       <div className='flex flex-col gap-6'>
         <div className='h-6 bg-neutral-200 rounded w-32'></div>
 
-        {/* Comment form skeleton */}
         <div className='flex items-center gap-4'>
           <div className='w-40 h-40 bg-neutral-200 rounded-full'></div>
           <div className='h-4 bg-neutral-200 rounded w-16'></div>
@@ -59,7 +51,6 @@ export default function Loading() {
 
         <div className='h-24 bg-neutral-200 rounded w-full'></div>
 
-        {/* Comments skeleton */}
         {[1, 2, 3].map((i) => (
           <div
             key={i}
